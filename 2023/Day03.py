@@ -1,8 +1,8 @@
 from ast import And
 import re
-example_engine = """467..114.5
+example_engine = """467..114..
 ...*......
-.*35..633.
+..35..633.
 ......#...
 617*......
 .....+.58.
@@ -40,8 +40,27 @@ for l in range(engine_len):
   number = ""
   char_index = 0;
   for char in char_curr_line:
-    if char.isdigit():
+    if char.isdigit() and char_index != len(char_curr_line)-1 :
       number += char 
+    elif char_index == len(char_curr_line)-1 and char.isdigit():
+      number += char 
+      #check if it is part number
+      begin_index = char_index - len(number)
+      #in current line
+      if number != "":
+        if is_part_number(begin_index, char_index, curr_line):
+          part_number.append(int(number))
+          number = ""
+      #in previus line
+      if prev_line != "" and number != "":
+        if is_part_number(begin_index, char_index, prev_line):
+          part_number.append(int(number))
+          number = ""            
+      #in next line
+      if next_line != "" and number != "":
+        if is_part_number(begin_index, char_index, next_line):
+          part_number.append(int(number))            
+          number = ""   
     else:
       #check if it is part number
       begin_index = char_index - len(number)
@@ -66,4 +85,5 @@ for l in range(engine_len):
 print("Part numbers are", part_number)
 
 total_sum = sum(part_number)
+
 print(f"The sum of all of the part numbers in the engine schematic is: {total_sum}")
