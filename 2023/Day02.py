@@ -1,4 +1,6 @@
 #Day 2: Cube Conundrum
+from functools import reduce
+from operator import mul
 
 games_str = """Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
 Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
@@ -9,23 +11,35 @@ Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green"""
 game_possible = {'red': 12, 'green': 13, 'blue': 14}
 
 games = games_str.split('\n')
+games_IDs_total = 0
+games_score_total = 0
 for game in games:
-  game_id, game_list = game.split(':')
-  ball_list= []
-  for sets in game_list.split(';'):
-    for balls in sets.split(','):
-      nr, color = balls.split()
-      ball_list.append((color, int(nr)))
-  sum_balls = {}
-  for color, value in ball_list:
-      sum_balls[color] = sum_balls.get(color, 0) + value
+    is_true = True
+    game_id_val, game_list = game.split(':')
+    game_id = int(game_id_val.split(" ")[1])
+    ball_list = []
+    for sets in game_list.split(';'):
+        pairs = sets.split(', ')
+        set_color_dict = {}
+        for pair in pairs:
+            count, color = pair.lstrip().split(' ')
+            set_color_dict[color] = int(count)
+        is_greater = all(set_color_dict.get(key, 0) <= game_possible.get(key, 0) for key in set(set_color_dict) | set(game_possible))
+        if is_greater == False: is_true = False
+        ball_list.append(set_color_dict)
 
-  is_posible = False
-  for key in game_possible:
-    if key in sum_balls and sum_balls[key] <= game_possible[key]:
-      is_posible = True
-    else:
-      is_posible = False
-      break
-  print(game_id, sum_balls)
-  if is_posible == True : print(game_id + ' is possible.')
+    #Part 1
+    if is_true: games_IDs_total += game_id
+    
+    #Part 2
+    max_values_dict = {}
+    for b in ball_list:
+        for key, value in b.items():
+            max_values_dict[key] = max(value, max_values_dict.get(key, float('-inf')))
+    result = 1
+    for value in max_values_dict.values():
+        result *= value
+    games_score_total += result
+    
+print(f"Part1 - Sum of the IDs: {games_IDs_total}")  
+print(f"Part2 - Score is: {games_score_total}")  
